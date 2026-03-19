@@ -2,6 +2,7 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import { GoogleGenAI, Type } from "@google/genai";
+import "dotenv/config";
 
 async function startServer() {
   const app = express();
@@ -9,11 +10,22 @@ async function startServer() {
 
   app.use(express.json());
 
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+  // API Key handling with multiple possible env var names
+  const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY || "";
+  
+  if (!apiKey) {
+    console.warn("WARNING: GEMINI_API_KEY is not set in the environment.");
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
 
   // API routes
   app.post("/api/gemini", async (req, res) => {
     const { type, payload, language = "English" } = req.body;
+
+    if (!apiKey) {
+      return res.status(500).json({ error: "Gemini API key is missing on the server." });
+    }
 
     try {
       switch (type) {
@@ -83,9 +95,12 @@ async function startServer() {
         default:
           return res.status(400).json({ error: "Invalid request type" });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Gemini API error:", error);
-      return res.status(500).json({ error: "Internal server error" });
+      return res.status(500).json({ 
+        error: "Gemini API error", 
+        details: error.message || String(error) 
+      });
     }
   });
 

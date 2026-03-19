@@ -20,7 +20,11 @@ export const getArticleExplanation = async (articleNumber: string, language: str
       language,
     }),
   });
-  if (!response.ok) throw new Error("Failed to fetch explanation");
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error("Explanation fetch failed:", errorData);
+    throw new Error(errorData.details || errorData.error || "Failed to fetch explanation");
+  }
   const data = await response.json();
   return data.text;
 };
@@ -35,7 +39,11 @@ export const findRelevantArticlesForCase = async (caseDescription: string, langu
       language,
     }),
   });
-  if (!response.ok) throw new Error("Failed to fetch case analysis");
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error("Case analysis fetch failed:", errorData);
+    throw new Error(errorData.details || errorData.error || "Failed to fetch case analysis");
+  }
   const data = await response.json();
   return data.text;
 };
@@ -50,7 +58,11 @@ export const searchConstitution = async (query: string, language: string = "Engl
       language,
     }),
   });
-  if (!response.ok) throw new Error("Failed to search constitution");
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error("Search fetch failed:", errorData);
+    throw new Error(errorData.details || errorData.error || "Failed to search constitution");
+  }
   const data = await response.json();
   return data.results as { number: string; title: string }[];
 };
@@ -65,7 +77,11 @@ export const getConstitutionalAmendments = async (query: string = "", language: 
       language,
     }),
   });
-  if (!response.ok) throw new Error("Failed to fetch amendments");
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error("Amendments fetch failed:", errorData);
+    throw new Error(errorData.details || errorData.error || "Failed to fetch amendments");
+  }
   const data = await response.json();
   return data.text;
 };
